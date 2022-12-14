@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+import sys
+import itertools
+import argparse
+
+def sep_strings(inp, main_delim=" ", sub_delim=":", tab="\t", fix=True):
+    tuples = [s.split(sep=sub_delim) for s in inp.split(sep=main_delim)]
+    l = max(len(t) for t in tuples)
+    def get_j(t,j):
+        # return the jth element or "" if there is none
+        if len(t) < j+1:
+            return ""
+        return t[j]
+
+    if not fix:
+        if not all(len(t)==l for t in tuples):
+            print(f"Error: missing elements, skipping line", file=sys.stderr)
+            return "---"
+        lists = [main_delim.join(t[j] for t in tuples) for j in range(l)]
+    else:
+        lists = [main_delim.join(get_j(t,j) for t in tuples) for j in range(l)]
+    return tab.join(lists)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+            prog = "lsep",
+            description = "Separate lists from each line of STDIN.",
+            epilog = "The inverse of this function is lmerge."
+            )
+    parser.add_argument("-D",
+                        "--listdelim",
+                        help="the character (or string) that separates the elements of each list (default is \" \")",
+                        default=" ")
+    parser.add_argument("-t",
+                        "--tab",
+                        help="the character (or string) that separates lists in each line (default is \"\\t\")",
+                        default="\t")
+    parser.add_argument("-d",
+                        "--subdelim",
+                        help="the character (or string) that separates elements in each tuple in the input (default is \":\")",
+                        default=":")
+    parser.add_argument("-c",
+                        "--complain",
+                        help="throw an error if some tuple has the wrong number of elements (the default is to fix each line by adding blank elements to the right)",
+                        action='store_true')
+    
+    args = parser.parse_args()
+
+    for line in map(str.rstrip, sys.stdin):
+        print(sep_strings(line, tab=args.tab,
+                          main_delim=args.listdelim,
+                          sub_delim=args.subdelim,
+                          fix=(not args.complain)))

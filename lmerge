@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+import sys
+import itertools
+import argparse
+
+def merge_strings(strings, main_delim=" ", new_delim=":", shortest=False):
+    lists = [s.split(sep=main_delim) for s in strings]
+    if shortest:
+        zipped=zip(*lists)
+    else:
+        zipped=itertools.zip_longest(*lists, fillvalue="")
+    
+    return main_delim.join(map(new_delim.join, zipped))
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+            prog = "lmerge",
+            description = "Merge lists together element-wise from each line of STDIN.",
+            epilog = "The inverse of this function is lsep."
+            )
+    parser.add_argument("-D",
+                        "--maindelim",
+                        help="the character (or string) that separates the elements of each list (default is \" \")",
+                        default=" ")
+    parser.add_argument("-t",
+                        "--tab",
+                        help="the character (or string) that separates lists in each line (default is \"\\t\")",
+                        default="\t")
+    parser.add_argument("-d",
+                        "--subdelim",
+                        help="the character (or string) that separates the ith elements in the output (default is \":\")",
+                        default=":")
+    parser.add_argument("-s",
+                        "--shortest",
+                        help="stop merging when the shortest list ends",
+                        action='store_true')
+    
+    
+    args = parser.parse_args()
+
+    for line in map(str.rstrip, sys.stdin):
+        print(merge_strings(line.split(sep=args.tab),
+                            main_delim=args.maindelim,
+                            new_delim=args.subdelim,
+                            shortest=args.shortest))
