@@ -29,4 +29,4 @@ $ cat tmp | lmerge | lsep
 111 112 113
 ```
 
-More examples to follow.
+More examples to follow. Sorry, this documentation is kinda rushed!
